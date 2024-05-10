@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sd21-inf2-serve
+  name: sd21-inf2-serve
+spec:
+  selector:
+    matchLabels:
+      app: sd21-inf2-serve
+  template:
+    metadata:
+      labels:
+        app: sd21-inf2-serve
+    spec:
+      nodeSelector:
+        karpenter.sh/nodepool: inf2
+      serviceAccountName: sd21-sa
+      schedulerName: my-scheduler
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+      containers:
+      - name: app
+        image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/stablediffusion:neuron2.19
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /dev/shm
+            name: dshm
+          - mountPath: /app
+            name: workdir
+        command: ["/start.sh"]
+        args: ["run"]
+        resources:
+          limits:
+            aws.amazon.com/neuron: 2
+        env:
+        - name: DEVICE
+          value: "xla"
+        - name: COMPILED_MODEL_ID
+          value: "yahavb/optimum-neuron-sd21-832-448"
+        - name: NUM_OF_RUNS_INF
+          value: "20"
+        - name: HEIGHT
+          value: "832"
+        - name: WIDTH
+          value: "448"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        ports:
+          - containerPort: 8000
+            protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 10
+      volumes:
+      - name: workdir
+        emptyDir: {}
+      - name: dshm
+        emptyDir:
+          medium: Memory
