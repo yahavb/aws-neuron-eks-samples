@@ -21,5 +21,3 @@ RUN apt-get update
 RUN apt-get install -y kubectl
 RUN kubectl version --client
 COPY * /
-RUN ls -l
-RUN find /
