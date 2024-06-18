@@ -7,6 +7,7 @@ RUN apt-get update -y --fix-missing
 RUN apt-get install -y python3-venv g++ gettext-base
 RUN python -m pip install wget
 RUN python -m pip install awscli
+ADD publish-to-sqs.sh /publish-to-sqs.sh
 
 #ENV model="stable-diffusion-2-1-base"
 #RUN echo "bucket is equal to ${bucket}"
