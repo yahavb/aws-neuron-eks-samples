@@ -1,6 +1,6 @@
 #!/bin/bash -x
 docker logout
-aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin $NEURON_DLC_IMAGE 
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $NEURON_DLC_IMAGE 
 docker pull $NEURON_DLC_IMAGE
 dlc_ecr=$(echo $NEURON_DLC_IMAGE| awk -F\: '{print $1}')
 dlc_image_tag=$(echo $NEURON_DLC_IMAGE| awk -F\: '{print $2}')
